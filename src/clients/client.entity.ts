@@ -2,6 +2,8 @@ import { StreetAddress } from "./street-address.entity";
 
 import { ClientContact } from "./client-contact.entity";
 import { ParseError } from "../lib/parse.error";
+import { EmailContact } from "./email-contact.entity";
+import { PhoneContact } from "./phone-contact.entity";
 
 export class Client {
   constructor(
@@ -34,7 +36,24 @@ export class Client {
 
     if (!addresses.length) throw new ParseError('at least one address is needed');
 
-    let contactList = (json.contactList || []).map(ClientContact.parseFromJson);
+    let contactList: ClientContact[] = (json.contactList || []).reduce((list: ClientContact[], c: any) => {
+      if (c.email) list.push(EmailContact.parseFromJson(c));
+      if (c.phone) list.push(PhoneContact.parseFromJson(c));
+      return list;
+    }, []);
+
+    // Making only one contact primary
+    contactList = contactList.reduce(({ found, list }, item) => {
+      if (!found && item.primary) {
+        found = true;
+        list.push(item);
+      } else {
+        item.primary = false;
+        list.push(item);
+      }
+
+      return { found, list };
+    }, { found: false, list: [] as ClientContact[] }).list;
 
     if (!contactList.length) throw new ParseError('at least one contact is needed');
 

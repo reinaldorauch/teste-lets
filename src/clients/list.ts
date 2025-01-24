@@ -17,6 +17,9 @@ export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = asy
       body: 'Hello world'
     }
   } catch (err) {
-
+    return {
+      statusCode: 500,
+      body: 'Internal Server Error: ' + (err?.message || err)
+    }
   }
 }
