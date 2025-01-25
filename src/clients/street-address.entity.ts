@@ -1,5 +1,5 @@
-import { validCountries, validStates } from "../lib/br";
-import { ParseError } from "../lib/parse.error";
+import { validCountries, validStates } from "../lib/br.js";
+import { ParseError } from "../lib/parse.error.js";
 
 export class StreetAddress {
   constructor(

@@ -1,6 +1,20 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "out/spec"
-  }
+    "baseUrl": "./",
+    "outDir": "./dist/",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDirs": [
+      "./src/",
+      "./tests/"
+    ],
+    "paths": {
+      "@app/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
+    },
+ },
+ "imports": {
+   "@app/*": "./src/*",
+   "@tests/*": "./tests/*"
+ }
 }

@@ -1,0 +1,295 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for Client Management REST API with DynamoDB Backend'
+
+Resources:
+  # DynamoDB Table for Clients
+  ClientsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Clients
+      AttributeDefinitions:
+        - AttributeName: ClientId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ClientId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ExpiresAt
+        Enabled: true
+
+  # IAM Role for API Gateway to interact with DynamoDB
+  ApiGatewayDynamoDBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Scan
+                Resource: !GetAtt ClientsTable.Arn
+
+  # REST API
+  ClientsRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ClientManagementAPI
+      Description: REST API for Client Management
+      FailOnWarnings: true
+
+  # Resource for Clients
+  ClientsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ParentId: !GetAtt ClientsRestApi.RootResourceId
+      PathPart: clients
+
+  # Individual Client Resource
+  ClientResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ParentId: !Ref ClientsResource
+      PathPart: '{clientId}'
+
+  # LIST Clients Method
+  ListClientsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ResourceId: !Ref ClientsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:dynamodb:action/Scan
+          - {}
+        Credentials: !GetAtt ApiGatewayDynamoDBRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "Clients"
+            }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: |
+                #set($inputRoot = $input.path('$'))
+                {
+                  "clients": $inputRoot.Items
+                }
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: Empty
+
+  # CREATE Client Method
+  CreateClientMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ResourceId: !Ref ClientsResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:dynamodb:action/PutItem
+          - {}
+        Credentials: !GetAtt ApiGatewayDynamoDBRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "Clients",
+              "Item": {
+                "ClientId": {"S": "$context.requestId"},
+                "Name": {"S": "$input.path('$.name')"},
+                "Email": {"S": "$input.path('$.email')"},
+                "CreatedAt": {"S": "$context.requestTime"},
+                "ExpiresAt": {"N": "$${timestamp() + 31536000}" }
+              }
+            }
+        IntegrationResponses:
+          - StatusCode: 201
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: |
+                {
+                  "clientId": "$context.requestId"
+                }
+      MethodResponses:
+        - StatusCode: 201
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: Empty
+
+  # GET Individual Client Method
+  GetClientMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ResourceId: !Ref ClientResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.clientId: true
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:dynamodb:action/GetItem
+          - {}
+        Credentials: !GetAtt ApiGatewayDynamoDBRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "Clients",
+              "Key": {
+                "ClientId": {"S": "$input.params('clientId')"}
+              }
+            }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: |
+                #set($inputRoot = $input.path('$'))
+                $inputRoot.Item
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: Empty
+
+  # UPDATE Client Method
+  UpdateClientMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ResourceId: !Ref ClientResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.clientId: true
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:dynamodb:action/UpdateItem
+          - {}
+        Credentials: !GetAtt ApiGatewayDynamoDBRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "Clients",
+              "Key": {
+                "ClientId": {"S": "$input.params('clientId')"}
+              },
+              "UpdateExpression": "SET #nm = :name, Email = :email",
+              "ExpressionAttributeNames": {
+                "#nm": "Name"
+              },
+              "ExpressionAttributeValues": {
+                ":name": {"S": "$input.path('$.name')"},
+                ":email": {"S": "$input.path('$.email')"}
+              }
+            }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: Empty
+
+  # DELETE Client Method
+  DeleteClientMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      ResourceId: !Ref ClientResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.clientId: true
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:dynamodb:action/DeleteItem
+          - {}
+        Credentials: !GetAtt ApiGatewayDynamoDBRole.Arn
+        RequestTemplates:
+          application/json: |
+            {
+              "TableName": "Clients",
+              "Key": {
+                "ClientId": {"S": "$input.params('clientId')"}
+              }
+            }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+          ResponseModels:
+            application/json: Empty
+
+  # Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ListClientsMethod
+      - CreateClientMethod
+      - GetClientMethod
+      - UpdateClientMethod
+      - DeleteClientMethod
+    Properties:
+      RestApiId: !Ref ClientsRestApi
+      StageName: prod
+
+Outputs:
+  RestApiId:
+    Description: REST API ID
+    Value: !Ref ClientsRestApi
+  RootResourceId:
+    Description: Root Resource ID
+    Value: !GetAtt ClientsRestApi.RootResourceId
+  ClientsTableName:
+    Description: Clients DynamoDB Table Name
+    Value: !Ref ClientsTable
+  ApiEndpoint:
+    Description: Prod stage endpoint for the Clients API
+    Value: !Sub https://${ClientsRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/clients

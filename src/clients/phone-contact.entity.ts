@@ -1,5 +1,5 @@
-import { ParseError } from "../lib/parse.error";
-import { ClientContact } from "./client-contact.entity";
+import { ParseError } from "../lib/parse.error.js";
+import { ClientContact } from "./client-contact.entity.js";
 
 export class PhoneContact extends ClientContact {
   constructor(

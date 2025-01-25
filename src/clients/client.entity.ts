@@ -1,9 +1,9 @@
-import { StreetAddress } from "./street-address.entity";
+import { StreetAddress } from "./street-address.entity.js";
 
-import { ClientContact } from "./client-contact.entity";
-import { ParseError } from "../lib/parse.error";
-import { EmailContact } from "./email-contact.entity";
-import { PhoneContact } from "./phone-contact.entity";
+import { ClientContact } from "./client-contact.entity.js";
+import { ParseError } from "../lib/parse.error.js";
+import { EmailContact } from "./email-contact.entity.js";
+import { PhoneContact } from "./phone-contact.entity.js";
 
 export class Client {
   constructor(
