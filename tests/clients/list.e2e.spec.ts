@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
-import { handler } from '@app/clients/list.js';
+import { handler } from '@app/clients/list.handler.js';
 
 describe('clients > list function', () => {
   test('it should list no clients', async () => {
