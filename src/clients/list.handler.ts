@@ -3,7 +3,6 @@ import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { fromEnv } from "@aws-sdk/credential-providers"; // ES6 import
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from "aws-lambda";
 import { Client } from "./client.entity.js";
-import { parseInteger } from "@app/lib/parse.js";
 
 const client = new DynamoDBClient({
   credentials: fromEnv(),
@@ -20,14 +19,11 @@ const defaultResponse = {
 
 /**
   * List clients, paginated and with serach in name
-  *
+  * TODO: Implement pagination or streaming of results because Dynamodb returns a maximum of 1MB per ScanCommand
   */
-export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = async (): Promise<APIGatewayProxyResult> => {
   try {
-    let page = parseInteger(event.queryStringParameters?.page);
-    let items = parseInteger(event.queryStringParameters?.items, 10);
-
-    const listCommand = new ScanCommand({ TableName: 'clients', Limit: items });
+    const listCommand = new ScanCommand({ TableName: 'clients' });
 
     const result = await docClient.send(listCommand);
     const found = result.Count;
@@ -38,7 +34,6 @@ export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = asy
       statusCode: 200,
       body: JSON.stringify({
         found,
-        page,
         data
       }),
     }

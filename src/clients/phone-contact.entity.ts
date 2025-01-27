@@ -1,3 +1,4 @@
+import { parseBool, parseString } from "@app/lib/parse.js";
 import { ParseError } from "../lib/parse.error.js";
 import { ClientContact } from "./client-contact.entity.js";
 
@@ -9,14 +10,14 @@ export class PhoneContact extends ClientContact {
     super(primary)
   }
 
-  static parseFromJson(contact: any): PhoneContact {
-    let primary = contact.primary;
+  static parseFromJson(contact: Record<string, unknown>): PhoneContact {
+    const primary = parseBool(contact, 'primary');
 
-    if (![true, false].includes(primary)) throw new ParseError('primary is not a boolean');
+    const phone = parseString(contact, 'phone');
 
-    let phone = contact.phone?.trim();
-    if (!phone) throw new ParseError('phone is required');
-    if (!/^\d*$/.test(phone)) throw new ParseError('phone is invalid, must contain only numbers');
+    if (!/^\d*$/.test(phone)) {
+      throw new ParseError('phone is invalid, must contain only numbers');
+    }
 
     return new PhoneContact(primary, phone);
   }

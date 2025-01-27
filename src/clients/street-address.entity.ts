@@ -19,19 +19,19 @@ export class StreetAddress {
   ) { }
 
   static parseFromJson(address: any): StreetAddress {
-    let label = address.label?.trim();
+    const label = address.label?.trim();
     if (!label) {
       throw new ParseError('label is required');
     }
 
-    let firstLine = address.firstLine?.trim();
+    const firstLine = address.firstLine?.trim();
     if (!firstLine) {
       throw new ParseError('firstLine is required');
     }
 
-    let secondLine = address.secondLine?.trim();
+    const secondLine = address.secondLine?.trim();
 
-    let zipCode = address.zipCode?.trim();
+    const zipCode = address.zipCode?.trim();
 
     if (!zipCode) {
       throw new ParseError('zip code is required');
@@ -40,19 +40,19 @@ export class StreetAddress {
       throw new ParseError('zip code must have 8 number chars');
     }
 
-    let city = address.city?.trim();
+    const city = address.city?.trim();
 
     if (!city) {
       throw new ParseError('city is required');
     }
 
-    let state = address.state?.trim();
+    const state = address.state?.trim();
 
     if (!validStates.includes(state)) {
       throw new ParseError('state is not valid and is required');
     }
 
-    let country = address.country?.trim();
+    const country = address.country?.trim();
 
     if (!validCountries.includes(country)) {
       throw new ParseError('country is not valid and is required');

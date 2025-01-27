@@ -4,43 +4,38 @@ import { ClientContact } from "./client-contact.entity.js";
 import { ParseError } from "../lib/parse.error.js";
 import { EmailContact } from "./email-contact.entity.js";
 import { PhoneContact } from "./phone-contact.entity.js";
+import { parseArray, parseBirthDate, parseString } from "@app/lib/parse.js";
 
 export class Client {
+  active: boolean = true;
+
   constructor(
     public fullName: string,
 
     public birthDate: string,
-
-    public active: boolean,
 
     public addresses: StreetAddress[],
 
     public contactList: ClientContact[],
   ) { }
 
-  static parseFromJson(json: any): Client {
-    let fullName = json.fullName?.trim();
+  static parseFromJson(json: Record<string, unknown>): Client {
+    const fullName = parseString(json, 'fullName');
 
-    if (!fullName) throw new ParseError('fullName is not valid');
+    const birthDate = parseBirthDate(parseString(json, 'birthDate'));
 
-    let birthDate = json.birthDate?.trim();
+    const addresses = parseArray(json, 'addresses', StreetAddress.parseFromJson);
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate.trim())) throw new ParseError('birthDate date is not valid');
-    const now = new Date().toISOString().split('T')[0];
-    if (birthDate >= now) throw new ParseError('birthDate date is greater than now');
+    let contactList: ClientContact[] = parseArray(json, 'contactList', (v) => {
+      if (v.email) {
+        return EmailContact.parseFromJson(v);
+      }
+      if (v.phone) {
+        return PhoneContact.parseFromJson(v);
+      }
 
-    let active = json?.active;
-    if (active !== true && active !== false) throw new ParseError('active is not boolean');
-
-    let addresses = (json.addresses || []).map(StreetAddress.parseFromJson);
-
-    if (!addresses.length) throw new ParseError('at least one address is needed');
-
-    let contactList: ClientContact[] = (json.contactList || []).reduce((list: ClientContact[], c: any) => {
-      if (c.email) list.push(EmailContact.parseFromJson(c));
-      if (c.phone) list.push(PhoneContact.parseFromJson(c));
-      return list;
-    }, []);
+      throw new ParseError('unindentified contact');
+    });
 
     // Making only one contact primary
     contactList = contactList.reduce(({ found, list }, item) => {
@@ -55,8 +50,6 @@ export class Client {
       return { found, list };
     }, { found: false, list: [] as ClientContact[] }).list;
 
-    if (!contactList.length) throw new ParseError('at least one contact is needed');
-
-    return new Client(fullName, birthDate, active, addresses, contactList);
+    return new Client(fullName, birthDate, addresses, contactList);
   }
 }
