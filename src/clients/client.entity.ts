@@ -5,8 +5,10 @@ import { ParseError } from "../lib/parse.error.js";
 import { EmailContact } from "./email-contact.entity.js";
 import { PhoneContact } from "./phone-contact.entity.js";
 import { parseArray, parseBirthDate, parseString } from "@app/lib/parse.js";
+import { randomUUID } from "node:crypto";
 
 export class Client {
+  clientId: string;
   active: boolean = true;
 
   constructor(
@@ -51,5 +53,11 @@ export class Client {
     }, { found: false, list: [] as ClientContact[] }).list;
 
     return new Client(fullName, birthDate, addresses, contactList);
+  }
+
+  static createFromJson(obj: Record<string, unknown>): Client {
+    const newClient = Client.parseFromJson(obj);
+    newClient.clientId = randomUUID();
+    return newClient;
   }
 }

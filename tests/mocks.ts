@@ -4,9 +4,11 @@ import { EmailContact } from '@app/clients/email-contact.entity.js';
 import { PhoneContact } from '@app/clients/phone-contact.entity.js';
 import { StreetAddress } from '@app/clients/street-address.entity.js';
 import { validCountries, validStates } from '@app/lib/br.js';
+import { randomUUID } from 'node:crypto';
 
 export const clientMock: () => Client = () => ({
   active: true,
+  clientId: randomUUID(),
   contactList: [faker.datatype.boolean() ? emailContactMock() : phoneContactMock()],
   birthDate: faker.date.birthdate().toISOString().split('T')[0],
   fullName: faker.person.fullName(),

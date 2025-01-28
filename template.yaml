@@ -22,7 +22,7 @@ Resources:
   listClientsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/list.handler
+      Handler: dist/src/clients/list-handler.handler
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -46,7 +46,7 @@ Resources:
   getClientByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/get.handler
+      Handler: dist/src/clients/get-handler.handler
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -66,11 +66,11 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  # This is a Lambda function config associated with the source code: put-item.js
+  # This is a Lambda function config associated with the source code: create-handler.js
   addClientFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/create.handler
+      Handler: dist/src/clients/create-handler.handler
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -91,7 +91,7 @@ Resources:
   updateClientByIdFunciton:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/update.handler
+      Handler: dist/src/clients/update-handler.handler
       Runtime: nodejs22.x
       Architectures:
         - x86_64
