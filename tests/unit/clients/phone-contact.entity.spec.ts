@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
 
-import { PhoneContact } from '@app/clients/phone-contact.entity.js'
+import { PhoneContact } from '@app/clients/entity/phone-contact.entity.js'
 
 describe('PhoneContact', () => {
   describe('.parseFromJson', () => {

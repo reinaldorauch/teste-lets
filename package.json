@@ -6,19 +6,20 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf dist",
-    "test": "pnpm clean && pnpm build && dotenv node -- --test dist/tests/**/*.spec.js",
-    "coverage": "dotenv tsx -- --test --experimental-test-coverage tests/**/*.spec.ts",
-    "build": "tsc && tsc-alias"
+    "coverage": "dotenv tsx -- --test --experimental-test-coverage tests/unit/**/*.spec.ts",
+    "test": "pnpm clean && pnpm build && dotenv node -- --test dist/tests/unit/**/*.spec.js",
+    "test-e2e": "pnpm clean && pnpm build && dotenv node -- --test-concurrency 1 --test dist/tests/e2e/**/*.spec.js",
+    "coverage-e2e": "dotenv tsx -- --test --test-concurrency 1 --experimental-test-coverage tests/e2e/**/*.spec.ts",
+    "build": "tsc && tsc-alias && cp package.json dist/src/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.734.0",
     "@aws-sdk/credential-providers": "^3.734.0",
-    "@aws-sdk/lib-dynamodb": "^3.734.0"
-  },
-  "devDependencies": {
+    "@aws-sdk/lib-dynamodb": "^3.734.0",
     "@eslint/js": "^9.19.0",
     "@faker-js/faker": "^9.4.0",
     "@istanbuljs/esm-loader-hook": "^0.3.0",

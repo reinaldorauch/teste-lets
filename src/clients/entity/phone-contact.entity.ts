@@ -1,5 +1,5 @@
 import { parseBool, parseString } from "@app/lib/parse.js";
-import { ParseError } from "../lib/parse.error.js";
+import { ParseError } from "../../lib/parse.error.js";
 import { ClientContact } from "./client-contact.entity.js";
 
 export class PhoneContact extends ClientContact {

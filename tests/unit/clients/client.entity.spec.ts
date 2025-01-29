@@ -1,8 +1,8 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { Client } from '@app/clients/client.entity.js';
-import { clientMock, emailContactMock, phoneContactMock } from '../mocks.js';
-import { omit } from '../utils.js';
+import { Client } from '@app/clients/entity/client.entity.js';
+import { clientMock, emailContactMock, phoneContactMock } from '../../mocks.js';
+import { omit } from '../../utils.js';
 import { faker } from '@faker-js/faker/locale/pt_BR';
 
 const ONE_YEAR = 364 * 24 * 60 * 60;
@@ -10,7 +10,8 @@ const ONE_YEAR = 364 * 24 * 60 * 60;
 describe('ClientEntity', () => {
   describe('#constructor', () => {
     test('should create when using the constructor', () => {
-      const c = clientMock();
+      const c = omit(clientMock(), ['clientId']) as Client;
+      c.clientId = undefined;
       Object.setPrototypeOf(c, Client.prototype);
       const newClient = new Client(c.fullName, c.birthDate, c.addresses, c.contactList);
       assert.deepEqual(c, newClient);

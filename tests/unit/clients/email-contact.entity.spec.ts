@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { strict as assert } from 'node:assert';
-import { EmailContact } from "@app/clients/email-contact.entity.js";
+import { EmailContact } from "@app/clients/entity/email-contact.entity.js";
 
 describe('EmailContact', () => {
   describe('#constructor', () => {

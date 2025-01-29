@@ -5,6 +5,24 @@ export const parseInteger = (maybeNumber: string | number, def = 0): number => {
   return Number.isNaN(num) ? def : num;
 }
 
+export const parseOptionalString = <T extends Record<string, unknown>>(obj: T, field: keyof T): string | undefined => {
+  if (!obj[field]) {
+    return undefined;
+  }
+
+  if (typeof obj[field] !== 'string') {
+    throw new ParseError(`${field.toString()} must be a string`);
+  }
+
+  const returnVal = obj[field].trim();
+
+  if (!returnVal) {
+    return undefined;
+  }
+
+  return returnVal;
+}
+
 export const parseString = <T extends Record<string, unknown>>(obj: T, field: keyof T): string => {
   if (!obj[field]) {
     throw new ParseError(`${field.toString()} is required`);

@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { StreetAddress } from '@app/clients/street-address.entity.js';
-import { omit } from '@tests/utils.js';
+import { StreetAddress } from '@app/clients/entity/street-address.entity.js';
+import { omit } from '../../utils.js';
 
 describe("StreetAddress", () => {
   describe(".parseFromJson", () => {
@@ -149,7 +149,7 @@ describe("StreetAddress", () => {
       try {
         StreetAddress.parseFromJson(clientAddress);
       } catch (err) {
-        assert.equal(err.message, 'zip code is required');
+        assert.equal(err.message, 'zipCode is required');
       }
     })
 

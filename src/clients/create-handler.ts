@@ -1,46 +1,41 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb"
 import { fromEnv } from "@aws-sdk/credential-providers"
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from "aws-lambda"
-import { Client } from "./client.entity.js";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import { Client } from "./entity/client.entity.js";
+import { handleAssertions } from "@app/lib/util.js";
+import { strict as assert, AssertionError } from "node:assert";
 
 const db = new DynamoDBClient({
   credentials: fromEnv(),
   endpoint: process.env.AWS_ENDPOINT_URL
 });
 
-const docDb = DynamoDBDocumentClient.from(db)
+const docDb = DynamoDBDocumentClient.from(db, { marshallOptions: { convertClassInstanceToMap: true } })
 
-export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handler = handleAssertions(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  assert(event.httpMethod === 'POST', 'this function only allows POST requests');
+  assert(event.body, 'this function should have a body');
+  assert(event.headers && event.headers['content-type'] === 'application/json', 'this function expects a JSON body');
+
+  let data: Record<string, unknown>;
+
   try {
-    if (event.httpMethod !== 'POST') {
-      throw new Error('this function only allows POST requests');
-    }
-
-    if (!event.body || event.headers['Content-Type'] !== 'application/json') {
-      throw new Error('this function expects a JSON body');
-    }
-
-    const client = Client.createFromJson(JSON.parse(event.body));
-
-    await docDb.send(new PutCommand({ TableName: 'clients', Item: client }));
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client
-      })
-    }
+    data = JSON.parse(event.body);
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      body: `InternalServerError: ${err.message}\n${err.stack}`
-    }
+    throw new AssertionError({ message: 'invalid json body:' + err.message });
   }
-}
+
+  const client = Client.createFromJson(data);
+
+  await docDb.send(new PutCommand({ TableName: 'clients', Item: client }));
+
+  return {
+    statusCode: 201,
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(client)
+  }
+});
+

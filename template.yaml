@@ -15,14 +15,11 @@ Transform:
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 Resources:
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: get-all-items.js
   listClientsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/list-handler.handler
+      Handler: clients/list-handler.handler
+      CodeUri: dist/src
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -32,7 +29,7 @@ Resources:
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref clients
+            TableName: !Ref clientsTable
       Events:
         Api:
           Type: Api
@@ -46,7 +43,8 @@ Resources:
   getClientByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/get-handler.handler
+      Handler: clients/get-handler.handler
+      CodeUri: dist/src
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -56,7 +54,7 @@ Resources:
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref clients
+            TableName: !Ref clientsTable
       Events:
         Api:
           Type: Api
@@ -70,7 +68,8 @@ Resources:
   addClientFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/create-handler.handler
+      Handler: clients/create-handler.handler
+      CodeUri: dist/src
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -80,7 +79,7 @@ Resources:
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref clients
+            TableName: !Ref clientsTable
       Events:
         Api:
           Type: Api
@@ -91,16 +90,18 @@ Resources:
   updateClientByIdFunciton:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/update-handler.handler
+      Handler: clients/update-handler.handler
       Runtime: nodejs22.x
+      CodeUri: dist/src
       Architectures:
         - x86_64
       MemorySize: 128
       Timeout: 100
       Description: Updates a client by it's id
       Policies:
+        # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-          TableName: !Ref clients
+            TableName: !Ref clientsTable
       Events:
         Api:
           Type: Api
@@ -111,7 +112,8 @@ Resources:
   deleteClientByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/src/clients/delete.handler
+      Handler: clients/delete.handler
+      CodeUri: dist/src
       Runtime: nodejs22.x
       Architectures:
         - x86_64
@@ -119,8 +121,9 @@ Resources:
       Timeout: 100
       Description: Deletes a client by it's id 
       Policies:
+        # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-          TableName: !Ref clients
+            TableName: !Ref clientsTable
       Events:
         Api:
           Type: Api
@@ -133,12 +136,15 @@ Resources:
 
   # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
   clientsTable:
-    Type: AWS::Serverless::Table
+    Type: AWS::DynamoDB::Table
     Properties:
       TableName: 'clients'
       AttributeDefinitions:
         - AttributeName: 'clientId'
           AttributeType: S
+      KeySchema:
+        - AttributeName: 'clientId'
+          KeyType: HASH
        
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -147,4 +153,4 @@ Resources:
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

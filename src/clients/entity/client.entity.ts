@@ -1,7 +1,7 @@
 import { StreetAddress } from "./street-address.entity.js";
 
 import { ClientContact } from "./client-contact.entity.js";
-import { ParseError } from "../lib/parse.error.js";
+import { ParseError } from "../../lib/parse.error.js";
 import { EmailContact } from "./email-contact.entity.js";
 import { PhoneContact } from "./phone-contact.entity.js";
 import { parseArray, parseBirthDate, parseString } from "@app/lib/parse.js";

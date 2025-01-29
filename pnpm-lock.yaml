@@ -7,7 +7,7 @@ settings:
 importers:
 
   .:
-    dependencies:
+    devDependencies:
       '@aws-sdk/client-dynamodb':
         specifier: ^3.734.0
         version: 3.734.0
@@ -17,7 +17,6 @@ importers:
       '@aws-sdk/lib-dynamodb':
         specifier: ^3.734.0
         version: 3.734.0(@aws-sdk/client-dynamodb@3.734.0)
-    devDependencies:
       '@eslint/js':
         specifier: ^9.19.0
         version: 9.19.0
