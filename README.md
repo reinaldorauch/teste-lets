@@ -2,6 +2,8 @@
 
 Repositório para submeter a avaliação para a vaga de backend pleno na LETS
 
+OBS: Não foi utilizado nenhum LLM (IA) para gerar código para este teste
+
 ## Como rodar o código
 
 Dependências:
