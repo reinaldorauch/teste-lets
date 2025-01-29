@@ -10,7 +10,8 @@
     "test": "pnpm clean && pnpm build && dotenv node -- --test dist/tests/unit/**/*.spec.js",
     "test-e2e": "pnpm clean && pnpm build && dotenv node -- --test-concurrency 1 --test dist/tests/e2e/**/*.spec.js",
     "coverage-e2e": "dotenv tsx -- --test --test-concurrency 1 --experimental-test-coverage tests/e2e/**/*.spec.ts",
-    "build": "tsc && tsc-alias && cp package.json dist/src/"
+    "build": "tsc && tsc-alias && cp package.json dist/src/",
+    "deploy-stack": "pnpm clean && pnpm build && sam build && sam deploy"
   },
   "keywords": [],
   "author": "",
