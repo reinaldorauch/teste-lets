@@ -17,8 +17,8 @@ Antes de tudo, rode o comando para instalar as dependencias de desenvolvimento:
 pnpm install
 ```
 
-Para fazer o deploy das funções no AWS Lambda é nessesário o aws-cli
-configurado com permissões do AWS Lambda e do DynamoDB e o aws-sam
+Para fazer o deploy das funções no AWS Lambda é nessesário o [aws-cli](https://aws.amazon.com/pt/cli/)
+configurado com permissões do AWS Lambda e do DynamoDB e o [aws-sam-cli](https://aws.amazon.com/pt/serverless/sam/)
 para orquestrar a criação do stack na AWS
 
 Rode o comando:
