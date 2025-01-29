@@ -1,6 +1,6 @@
 # Teste LETS
 
-Repositório para submeter a avaliação para a vaga de backend senior na LETS
+Repositório para submeter a avaliação para a vaga de backend pleno na LETS
 
 ## Como rodar o código
 
