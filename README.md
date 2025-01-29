@@ -11,6 +11,12 @@ Dependências:
 - nodejs@22
 - pnpm@10
 
+Antes de tudo, rode o comando para instalar as dependencias de desenvolvimento:
+
+```sh
+pnpm install
+```
+
 Para fazer o deploy das funções no AWS Lambda é nessesário o aws-cli
 configurado com permissões do AWS Lambda e do DynamoDB e o aws-sam
 para orquestrar a criação do stack na AWS
