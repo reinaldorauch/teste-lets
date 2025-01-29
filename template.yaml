@@ -112,7 +112,7 @@ Resources:
   deleteClientByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: clients/delete.handler
+      Handler: clients/delete-handler.handler
       CodeUri: dist/src
       Runtime: nodejs22.x
       Architectures:
