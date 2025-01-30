@@ -35,7 +35,7 @@ Para rodar os testes unitários rode o comando:
 pnpm test
 ```
 
-Para rodar os testes unitários com code coverate rode o comando
+Para rodar os testes unitários com code coverage rode o comando
 
 ```sh
 pnpm coverage
